@@ -1,6 +1,6 @@
 # Simple LangChain Agent with Evaluation
 
-A production-ready AI agent built with LangChain and LangGraph that demonstrates dynamic tool use with OpenAI models. Includes built-in evaluation and testing via LangSmith for validating agent behavior.
+A production-ready AI agent built with LangChain that demonstrates dynamic tool use with OpenAI models. Includes built-in evaluation and testing via LangSmith for validating agent behavior.
 
 ## Features
 
@@ -135,18 +135,37 @@ Simple_Langraph_Agent/
 
 ### Agent Architecture
 
-The agent uses a **ReAct** (Reasoning + Acting) pattern:
-- **Input:** User message
-- **Reasoning:** LLM decides which tools to invoke
-- **Acting:** Tools are called in parallel or sequence as needed
-- **Output:** Final response from the agent
+The agent uses **LangChain's Agent Framework** with an agentic loop:
+- **Input:** User message passed to `agent.invoke()`
+- **Reasoning:** GPT-4o analyzes the input and decides which tools to use
+- **Acting:** Selected tools are executed (weather lookup, thought generation)
+- **Output:** Final response is returned without additional commentary
+
+The agent runs in a loop until it determines no further action is needed.
+
+### Implementation Details
+
+The agent is created using LangChain's `create_agent()` function:
+```python
+agent = create_agent(
+    model="openai:gpt-4o",    
+    tools=[get_weather, create_daily_thought],
+    system_prompt="You are a helpful assistant. Make sure that you only respond with whatever is coming as input to the agent, and do not add any extra commentary or explanation.",
+)
+```
+
+This creates an agent that:
+1. Takes user input as messages
+2. Uses GPT-4o to reason about which tools to invoke
+3. Automatically executes the appropriate tools
+4. Returns results based on the system prompt instructions
 
 ### System Prompt
 
-The agent operates under this system prompt:
+The agent operates under this specific system prompt:
 > "You are a helpful assistant. Make sure that you only respond with whatever is coming as input to the agent, and do not add any extra commentary or explanation."
 
-This ensures clean, focused responses from the agent.
+This ensures clean, focused responses without unnecessary elaboration.
 
 ### Available Tools
 
@@ -203,13 +222,15 @@ To enable tracing and evaluation:
 
 | Package | Purpose |
 |---------|---------|
-| `langchain` | Core agent/LLM framework |
+| `langchain` | Core agent framework and tool integration |
 | `langchain-openai` | OpenAI model integration |
-| `langgraph` | Graph-based agent orchestration |
 | `python-dotenv` | Environment variable management |
 | `requests` | HTTP requests (if needed by tools) |
+| `langgraph` | Not currently used (can be removed) |
 
 See `requirements.txt` for pinned versions.
+
+**Note:** LangGraph is listed in `requirements.txt` but not actively used in the current implementation. You can safely remove it if you don't plan to use it.
 
 ## API Costs
 
